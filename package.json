@@ -1,0 +1,31 @@
+{
+  "name": "learning-mcp",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/server.ts",
+  "scripts": {
+    "server:build": "tsc",
+    "server:build:watch": "tsc --watch",
+    "server:dev": "tsx src/server.ts",
+    "server:inspect": "set DANGEROUSLY_OMIT_AUTH=true && npx @modelcontextprotocol/inspector npm run server:dev",
+    "client:dev": "tsx src/client.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "dependencies": {
+    "@ai-sdk/google": "^1.2.22",
+    "@inquirer/prompts": "^7.10.1",
+    "@modelcontextprotocol/sdk": "^1.26.0",
+    "ai": "^6.0.71",
+    "dotenv": "^17.2.3",
+    "zod": "^3.25.67"
+  },
+  "license": "ISC",
+  "packageManager": "pnpm@10.11.1",
+  "devDependencies": {
+    "@modelcontextprotocol/inspector": "^0.19.0",
+    "@types/node": "^25.2.0",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
+  }
+}
