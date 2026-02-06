@@ -5,6 +5,7 @@ import {
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import z from "zod";
 import fs from "node:fs/promises";
+import { CreateMessageResultSchema } from "@modelcontextprotocol/sdk/types.js";
 
 const server = new McpServer({
   name: "test",
@@ -76,7 +77,7 @@ server.resource(
 );
 
 server.tool(
-  "create user",
+  "create-user",
   "Create a new user in database",
   {
     name: z.string(),
@@ -105,8 +106,66 @@ server.tool(
   },
 );
 
+server.tool(
+  "create-random-user",
+  "Create a new user in database",
+  {
+    title: "Create Random User",
+    readOnlyHint: false,
+    destructiveHint: false,
+    idempotentHint: false,
+    openWorldHint: true,
+  },
+  async () => {
+    const result = await server.server.request(
+      {
+        method: "sampling/createMessage",
+        params: {
+          messages: [
+            {
+              role: "user",
+              content: {
+                type: "text",
+                text: "Generate fake user data. The user should have a realistic name, email, address, and phone number. Return this data as a JSON object with no other text or formatter so it can be used with JSON.parse.",
+              },
+            },
+          ],
+          maxTokens: 1024,
+        },
+      },
+      CreateMessageResultSchema,
+    );
+
+    if (result.content.type !== "text") {
+      return {
+        content: { type: "text", text: "Failed to generate user data" },
+      };
+    }
+
+    try {
+      const fakeUser = JSON.parse(
+        result.content.text
+          .trim()
+          .replace(/^```json/, "")
+          .replace(/```$/, "")
+          .trim(),
+      );
+
+      const id = await createUser(fakeUser);
+
+      return {
+        content: [{ type: "text", text: `User ${id} created successfully` }],
+      };
+    } catch (error) {
+      return {
+        content: { type: "text", text: "Failed to generate user data" },
+      };
+    }
+  },
+);
+
 server.prompt(
-  "generate fake user",
+  "generate-fake-user",
   "Generate a fake user based upon the given name in database",
   {
     name: z.string(),
