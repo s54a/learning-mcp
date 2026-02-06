@@ -105,6 +105,27 @@ server.tool(
   },
 );
 
+server.prompt(
+  "generate fake user",
+  "Generate a fake user based upon the given name in database",
+  {
+    name: z.string(),
+  },
+  ({ name }) => {
+    return {
+      messages: [
+        {
+          role: "user",
+          content: {
+            type: "text",
+            text: `Generate a fake user with the name ${name}. The user should have a realistic email, address and phone number.`,
+          },
+        },
+      ],
+    };
+  },
+);
+
 async function createUser(user: {
   name: string;
   email: string;
