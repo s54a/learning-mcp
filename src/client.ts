@@ -103,19 +103,17 @@ async function main() {
       case "Prompts":
         const promptName = await select({
           message: "Select a prompt",
-          choices: [
-            ...prompts.map((prompt) => ({
-              name: prompt.name,
-              value: prompt.name,
-              description: prompt.description,
-            })),
-          ],
+          choices: prompts.map((prompt) => ({
+            name: prompt.name,
+            value: prompt.name,
+            description: prompt.description,
+          })),
         });
 
         const prompt = prompts.find((p) => p.name === promptName);
 
         if (prompt == null) {
-          console.error("Resource not found.");
+          console.error("Prompt not found.");
         } else {
           await handlePrompt(prompt);
         }
@@ -126,10 +124,11 @@ async function main() {
     }
   }
 }
+
 async function handleQuery(tools: Tool[]) {
   const query = await input({ message: "Enter your query" });
 
-  const { text, toolResults } = generateText({
+  const { text, toolResults } = await generateText({
     model: google("gemini-2.5-flash"),
     prompt: query,
     tools: tools.reduce(
@@ -139,7 +138,7 @@ async function handleQuery(tools: Tool[]) {
           description: tool.description,
           parameters: jsonSchema(tool.inputSchema),
           execute: async (args: Record<string, any>) => {
-            const result = await mcp.callTool({
+            return await mcp.callTool({
               name: tool.name,
               arguments: args,
             });
@@ -151,7 +150,8 @@ async function handleQuery(tools: Tool[]) {
   });
 
   console.log(
-    text || toolResults[0]?.result?.contents[0]?.text || "no text generated",
+    // @ts-expect-error
+    text || toolResults[0]?.result?.content[0]?.text || "No text generated.",
   );
 }
 
@@ -228,7 +228,7 @@ async function handleServerMessagePrompt(message: PromptMessage) {
   console.log(message.content.text);
 
   const run = await confirm({
-    message: "would you like to run the above prompt",
+    message: "Would you like to run the above prompt",
     default: true,
   });
 
