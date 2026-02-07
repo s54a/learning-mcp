@@ -3,6 +3,7 @@ import { confirm, input, select } from "@inquirer/prompts";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 import {
+  CreateMessageRequestSchema,
   Prompt,
   PromptMessage,
   Tool,
@@ -42,6 +43,26 @@ async function main() {
       mcp.listResources(),
       mcp.listResourceTemplates(),
     ]);
+
+  mcp.setRequestHandler(CreateMessageRequestSchema, async (request) => {
+    const texts: string[] = [];
+
+    for (const message of request.params.messages) {
+      const text = await handleServerMessagePrompt(message);
+
+      if (text != null) texts.push(text);
+    }
+
+    return {
+      role: "user",
+      model: "gemini-2.5-flash",
+      stopReason: "endTurn",
+      content: {
+        type: "text",
+        text: texts.join("\n"),
+      },
+    };
+  });
 
   console.log("You are connected!");
   while (true) {
