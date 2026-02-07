@@ -48,6 +48,7 @@ async function main() {
     const texts: string[] = [];
 
     for (const message of request.params.messages) {
+      // @ts-ignore
       const text = await handleServerMessagePrompt(message);
 
       if (text != null) texts.push(text);

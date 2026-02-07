@@ -105,9 +105,32 @@
   },
   {
     "id": 15,
-    "name": "Kyle",
-    "email": "test@test.com",
-    "address": "345345",
-    "phone": "345345345"
+    "name": {
+      "first": "Olivia",
+      "last": "Davis"
+    },
+    "email": "olivia.davis@example.com",
+    "address": {
+      "street": "789 Pine Lane",
+      "city": "Fairview",
+      "state": "GA",
+      "zipCode": "30303"
+    },
+    "phone": "(555) 123-4567"
+  },
+  {
+    "id": 16,
+    "name": {
+      "first": "Olivia",
+      "last": "Davis"
+    },
+    "email": "olivia.davis@example.com",
+    "address": {
+      "street": "789 Pine Lane",
+      "city": "Fairview",
+      "state": "GA",
+      "zipCode": "30303"
+    },
+    "phone": "(555) 123-4567"
   }
 ]
