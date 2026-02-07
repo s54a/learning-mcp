@@ -158,7 +158,12 @@ server.tool(
       };
     } catch (error) {
       return {
-        content: [{ type: "text", text: error }],
+        content: [
+          {
+            type: "text",
+            text: `Failed to generate user data. Error: ${error}`,
+          },
+        ],
       };
     }
   },
