@@ -9,6 +9,7 @@ import {
 } from "@modelcontextprotocol/sdk/types.js";
 import { generateText } from "ai";
 import { createGroq } from "@ai-sdk/groq";
+import { createGoogleGenerativeAI } from "@ai-sdk/google";
 
 const mcp = new Client(
   {
@@ -26,6 +27,10 @@ const transport = new StdioClientTransport({
 
 const groq = createGroq({
   apiKey: process.env.GROK_API_KEY,
+});
+
+const google = createGoogleGenerativeAI({
+  apiKey: process.env.GEMINI_API_KEY,
 });
 
 async function main() {
@@ -115,6 +120,9 @@ async function main() {
           await handlePrompt(prompt);
         }
         break;
+
+      // case "Query":
+      //   await handleQuery(tools);
     }
   }
 }
@@ -199,7 +207,8 @@ async function handleServerMessagePrompt(message: PromptMessage) {
   if (!run) return;
 
   const { text } = await generateText({
-    model: groq("llama-3.1-8b-instant"),
+    // model: groq("llama-3.1-8b-instant"),
+    model: google("gemini-2.5-flash"),
     prompt: message.content.text,
   });
 
