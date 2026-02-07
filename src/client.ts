@@ -7,7 +7,7 @@ import {
   PromptMessage,
   Tool,
 } from "@modelcontextprotocol/sdk/types.js";
-import { generateText } from "ai";
+import { generateText, jsonSchema, ToolSet } from "ai";
 import { createGroq } from "@ai-sdk/groq";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 
@@ -121,10 +121,38 @@ async function main() {
         }
         break;
 
-      // case "Query":
-      //   await handleQuery(tools);
+      case "Query":
+        await handleQuery(tools);
     }
   }
+}
+async function handleQuery(tools: Tool[]) {
+  const query = await input({ message: "Enter your query" });
+
+  const { text, toolResults } = generateText({
+    model: google("gemini-2.5-flash"),
+    prompt: query,
+    tools: tools.reduce(
+      (obj, tool) => ({
+        ...obj,
+        [tool.name]: {
+          description: tool.description,
+          parameters: jsonSchema(tool.inputSchema),
+          execute: async (args: Record<string, any>) => {
+            const result = await mcp.callTool({
+              name: tool.name,
+              arguments: args,
+            });
+          },
+        },
+      }),
+      {} as ToolSet,
+    ),
+  });
+
+  console.log(
+    text || toolResults[0]?.result?.contents[0]?.text || "no text generated",
+  );
 }
 
 async function handleTool(tool: Tool) {
