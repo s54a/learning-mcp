@@ -14,7 +14,6 @@
   "author": "",
   "dependencies": {
     "@ai-sdk/google": "^1.2.19",
-    "@ai-sdk/groq": "^3.0.22",
     "@inquirer/prompts": "^7.10.1",
     "@modelcontextprotocol/sdk": "^1.26.0",
     "ai": "^4.3.19",
