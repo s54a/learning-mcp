@@ -19,24 +19,22 @@ const transport = new StdioClientTransport({
 
 async function main() {
   await mcp.connect(transport);
-
   const [{ tools }, { prompts }, { resources }, { resourceTemplates }] =
     await Promise.all([
-      await mcp.listTools(),
-      await mcp.listPrompts(),
-      await mcp.listResources(),
-      await mcp.listResourceTemplates(),
+      mcp.listTools(),
+      mcp.listPrompts(),
+      mcp.listResources(),
+      mcp.listResourceTemplates(),
     ]);
 
-  console.log("Your are connected");
-
+  console.log("You are connected!");
   while (true) {
-    const options = await select({
+    const option = await select({
       message: "What would you like to do",
       choices: ["Query", "Tools", "Resources", "Prompts"],
     });
 
-    switch (options) {
+    switch (option) {
       case "Tools":
         const toolName = await select({
           message: "Select a tool",
@@ -47,10 +45,10 @@ async function main() {
           })),
         });
 
-        const tool = tools.find((t) => (t.name = toolName));
+        const tool = tools.find((t) => t.name === toolName);
 
         if (tool == null) {
-          console.error("tool not found.");
+          console.error("Tool not found.");
         } else {
           await handleTool(tool);
         }
@@ -96,7 +94,7 @@ async function handleTool(tool: Tool) {
     tool.inputSchema.properties ?? {},
   )) {
     args[key] = await input({
-      message: `Enter value for ${key} ${(value as { type: string }).type}:`,
+      message: `Enter value for ${key} (${(value as { type: string }).type}):`,
     });
   }
 
@@ -128,9 +126,13 @@ async function handleResource(uri: string) {
     uri: finalUri,
   });
 
-  console.log(
-    JSON.stringify(JSON.parse(res.contents[0].text as string), null, 2),
-  );
+  const content = res.contents[0];
+
+  if ("text" in content) {
+    console.log(JSON.stringify(JSON.parse(content.text), null, 2));
+  } else if ("blob" in content) {
+    console.error("Received binary content, not text.");
+  }
 }
 
 main();
