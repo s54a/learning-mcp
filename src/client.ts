@@ -9,7 +9,7 @@ import {
   Tool,
 } from "@modelcontextprotocol/sdk/types.js";
 import { generateText, jsonSchema, ToolSet } from "ai";
-import { createGroq } from "@ai-sdk/groq";
+// import { createGroq } from "@ai-sdk/groq";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 
 const mcp = new Client(
@@ -26,9 +26,9 @@ const transport = new StdioClientTransport({
   stderr: "ignore",
 });
 
-const groq = createGroq({
-  apiKey: process.env.GROK_API_KEY,
-});
+// const groq = createGroq({
+//   apiKey: process.env.GROK_API_KEY,
+// });
 
 const google = createGoogleGenerativeAI({
   apiKey: process.env.GEMINI_API_KEY,

@@ -5,7 +5,12 @@ import {
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { CreateMessageResultSchema } from "@modelcontextprotocol/sdk/types.js";
 import { z } from "zod";
-import fs from "node:fs/promises";
+import { connectDB } from "./db/connection.js";
+import {
+  getAllUsers,
+  getUserById,
+  createUser as createUserInDB,
+} from "./db/userRepository.js";
 
 const server = new McpServer({
   name: "test",
@@ -21,9 +26,7 @@ server.resource(
     mimeType: "application/json",
   },
   async (uri) => {
-    const users = await import("./data/users.json", {
-      with: { type: "json" },
-    }).then((m) => m.default);
+    const users = await getAllUsers();
 
     return {
       contents: [
@@ -46,18 +49,14 @@ server.resource(
     mimeType: "application/json",
   },
   async (uri, { userId }) => {
-    const users = await import("./data/users.json", {
-      with: { type: "json" },
-    }).then((m) => m.default);
-
-    const user = users.find((u) => u.id === parseInt(userId as string));
+    const user = await getUserById(userId as string);
 
     if (user === null) {
       return {
         contents: [
           {
             uri: uri.href,
-            text: JSON.stringify({ error: "No user found for the given" }),
+            text: JSON.stringify({ error: "No user found for the given ID" }),
             mimeType: "application/json",
           },
         ],
@@ -94,7 +93,7 @@ server.tool(
   },
   async (params) => {
     try {
-      const id = await createUser(params);
+      const id = await createUserInDB(params);
 
       return {
         content: [{ type: "text", text: `User ${id} created successfully` }],
@@ -152,7 +151,7 @@ server.tool(
           .trim(),
       );
 
-      const id = await createUser(fakeUser);
+      const id = await createUserInDB(fakeUser);
 
       return {
         content: [{ type: "text", text: `User ${id} created successfully` }],
@@ -186,26 +185,9 @@ server.prompt(
   },
 );
 
-async function createUser(user: {
-  name: string;
-  email: string;
-  address: string;
-  phone: string;
-}) {
-  const users = await import("./data/users.json", {
-    with: { type: "json" },
-  }).then((m) => m.default);
-
-  const id = users.length + 1;
-
-  users.push({ id, ...user });
-
-  await fs.writeFile("./src/data/users.json", JSON.stringify(users, null, 2));
-
-  return id;
-}
-
 async function main() {
+  await connectDB();
+
   const transport = new StdioServerTransport();
 
   await server.connect(transport);

@@ -12,10 +12,5 @@
         }
       }
     }
-    // "test server": {
-    //   "type": "stdio",
-    //   "command": "pnpm",
-    //   "args": ["run", "server:dev"]
-    // }
   }
 }
