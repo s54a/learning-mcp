@@ -158,7 +158,7 @@ server.tool(
       };
     } catch (error) {
       return {
-        content: [{ type: "text", text: "Failed to generate user data" }],
+        content: [{ type: "text", text: error }],
       };
     }
   },
@@ -187,6 +187,8 @@ server.prompt(
 
 async function main() {
   await connectDB();
+
+  console.log("DB Connected");
 
   const transport = new StdioServerTransport();
 

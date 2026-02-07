@@ -13,12 +13,19 @@ export async function getAllUsers(): Promise<IUser[]> {
 }
 
 export async function getUserById(userId: string): Promise<IUser | null> {
-  const user = await User.findById(userId);
-  return user;
+  return User.findOne({ id: Number(userId) });
 }
 
-export async function createUser(userData: CreateUserInput): Promise<string> {
-  const user = new User(userData);
-  const savedUser = await user.save();
-  return savedUser._id.toString();
+export async function createUser(userData: CreateUserInput): Promise<number> {
+  const lastUser = await User.findOne().sort({ id: -1 }).select({ id: 1 });
+
+  const nextId = lastUser ? lastUser.id + 1 : 1;
+
+  const user = new User({
+    id: nextId,
+    ...userData,
+  });
+
+  await user.save();
+  return nextId;
 }
