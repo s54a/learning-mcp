@@ -74,12 +74,15 @@ async function main() {
           ],
         });
 
-        const tool = tools.find((t) => (t.name = toolName));
+        const uri =
+          resources.find((r) => r.uri === resourceURI)?.uri ??
+          resourceTemplates.find((r) => r.uriTemplate === resourceURI)
+            ?.uriTemplate;
 
-        if (tool == null) {
-          console.error("tool not found.");
+        if (uri == null) {
+          console.error("Resource not found.");
         } else {
-          await handleTool(tool);
+          await handleResource(uri);
         }
         break;
     }
@@ -103,6 +106,31 @@ async function handleTool(tool: Tool) {
   });
 
   console.log((res.content as [{ text: string }])[0].text);
+}
+
+async function handleResource(uri: string) {
+  let finalUri = uri;
+
+  const paramMatches = uri.match(/{([^}]+)}/g);
+
+  if (paramMatches != null) {
+    for (const paramMatch of paramMatches) {
+      const paramName = paramMatch.replace("{", "").replace("}", "");
+
+      const paramValue = await input({
+        message: `Enter value for ${paramName}:`,
+      });
+      finalUri = finalUri.replace(paramMatch, paramValue);
+    }
+  }
+
+  const res = await mcp.readResource({
+    uri: finalUri,
+  });
+
+  console.log(
+    JSON.stringify(JSON.parse(res.contents[0].text as string), null, 2),
+  );
 }
 
 main();
